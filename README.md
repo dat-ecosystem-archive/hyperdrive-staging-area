@@ -1,6 +1,14 @@
 # staged-hyperdrive
 
-Hyperdrive with a staging area for local, uncommited writes (wraps hyperdrive).
+Hyperdrive with a staging area for local, uncommited writes.
+
+```
+npm install staged-hyperdrive
+```
+
+## Usage
+
+Staged-hyperdrive adds new methods (and behaviors) to hyperdrive.
 
 ```js
 var stagedHyperdrive = require('staged-hyperdrive')
@@ -55,21 +63,16 @@ function next2() {
 }
 ```
 
-The staging area is similar to in git. This module exposes an identical API to hyperdrive, but adds new API methods:
+## Details
 
- - archive.diff() - list the changes currently in staging
- - archive.commit() - write all changes to the archive
- - archive.revert() - undo all changes
-
-The "staging area" is defined as the current archive state written to disk. It also includes changes which have been made locally, but haven't been written the the archive's internal logs. Changes which have been downloaded remotely will overwrite whatever is in staging.
-
-The archive operations have been modified as follows:
+The "staging area" is the current archive state written to disk. It includes changes which have been made locally, but which may not have been written the the archive's internal logs. The archive operations have been modified as follows:
 
  - Owned archives:
    - All read operations provide the content in staging.
    - All write operations modify the content in staging.
  - Unowned archives:
    - All operations pass through to hyperdrive.
+   - Changes are downloaded will overwrite whatever is in staging.
 
 To access the current committed state, or past versions, use hyperdrive's existing `checkout()` method.
 
