@@ -2,6 +2,8 @@
 
 Hyperdrive with a staging area for local, uncommited writes.
 
+**NOTE** Non-owned archives have all current files downloaded automatically.
+
 ```
 npm install staged-hyperdrive
 ```
@@ -9,9 +11,9 @@ npm install staged-hyperdrive
 ## TODO
 
  - [ ] Copy received files into the staging area
- - [ ] Add .diff()
- - [ ] Add .commit()
- - [ ] Add .revert()
+ - [ ] Add .diffStaging()
+ - [x] Add .commit()
+ - [x] Add .revert()
  - [ ] Tests
 
 ## Usage
@@ -88,14 +90,15 @@ To access the current committed state, or past versions, use hyperdrive's existi
 
 **NOTE** StagedArchive's constructor must be given a string for `storage`. Metadata is stored under `./.dat`.
 
-#### `archive.diff(callback)`
+#### `archive.diffStaging(cb)`
 
 List the changes currently in staging. Output looks like:
 
 ```js
 [
   {
-    change: 'add' | 'modify' | 'del',
+    change: 'add' | 'modify' | 'del'
+    type: 'directory' | 'file'
     name: String (path of the file)
   },
   ...
@@ -104,8 +107,8 @@ List the changes currently in staging. Output looks like:
 
 #### `archive.commit(callback)`
 
-Write all changes to the archive. Output is the same as `diff()`.
+Write all changes to the archive. Output is the same as `diffStaging()`.
 
 #### `archive.revert()`
 
-Undo all changes.  Output is the same as `diff()`, but indicates that those changes were *not* applied.
+Undo all changes.  Output is the same as `diffStaging()`, but indicates that those changes were *not* applied. Output is the same as `diffStaging()`.

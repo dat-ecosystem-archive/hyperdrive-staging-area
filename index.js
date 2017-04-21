@@ -5,6 +5,7 @@ var Hyperdrive = require('hyperdrive')
 var duplexify = require('duplexify')
 var inherits = require('inherits')
 var util = require('./util')
+var syncStaging = require('./sync-staging')
 var isPathDotDat = util.isPathDotDat
 
 module.exports = StagedHyperdrive
@@ -17,6 +18,90 @@ function StagedHyperdrive (stagingPath, key, opts) {
 }
 
 inherits(StagedHyperdrive, Hyperdrive)
+
+// new methods
+// =
+
+StagedHyperdrive.prototype.diffStaging = function () {
+
+}
+
+StagedHyperdrive.prototype.commit = function (cb) {
+  var self = this
+  this.diffStaging(function (err, diffs) {
+    if (err) return cb(err)
+
+    // iterate all diffs
+    var i = 0
+    next()
+    function next (err) {
+      if (err) return cb(err)
+
+      // get next diff
+      var d = diffs[i++]
+      if (!d) return cb(diffs)
+
+      // handle each op
+      var op = d.change + d.type
+      if (op === 'adddirectory') {
+        Hyperdrive.prototype.mkdir.call(self, d.name, next)
+      }
+      if (op === 'deldirectory') {
+        Hyperdrive.prototype.rmdir.call(self, d.name, next)
+      }
+      if (op === 'addfile' || op === 'modifyfile') {
+        pump(
+          fs.createReadStream(util.join(self.stagingPath, d.name)),
+          Hyperdrive.prototype.createWriteStream.call(self, d.name),
+          next
+        )
+      }
+      if (op === 'delfile') {
+        Hyperdrive.prototype.unlink.call(self, d.name, next)
+      }
+    }
+  })
+}
+
+StagedHyperdrive.prototype.revert = function () {
+  var self = this
+  this.diffStaging(function (err, diffs) {
+    if (err) return cb(err)
+
+    // iterate all diffs, in reverse
+    var i = diffs.length - 1
+    next()
+    function next (err) {
+      if (err) return cb(err)
+
+      // get next diff
+      var d = diffs[i--]
+      if (!d) return cb(diffs)
+
+      // handle each op by doing the opposite action
+      var op = d.change + d.type
+      if (op === 'adddirectory') {
+        fs.rmdir(util.join(self.stagingPath, d.name), next)
+      }
+      if (op === 'deldirectory') {
+        fs.mkdir(util.join(self.stagingPath, d.name), next)
+      }
+      if (op === 'addfile') {
+        fs.unlink(d.name, next)
+      }
+      if (op === 'modifyfile' || op === 'delfile') {
+        pump(
+          Hyperdrive.prototype.createReadStream.call(self, d.name),
+          fs.createWriteStream(util.join(self.stagingPath, d.name)),
+          next
+        )
+      }
+    }
+  }) 
+}
+
+// wrappers around existing methods
+// =
 
 StagedHyperdrive.prototype.createReadStream = function (name, opts) {
   var self = this
