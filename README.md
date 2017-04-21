@@ -6,6 +6,14 @@ Hyperdrive with a staging area for local, uncommited writes.
 npm install staged-hyperdrive
 ```
 
+## TODO
+
+ - [ ] Copy received files into the staging area
+ - [ ] Add .diff()
+ - [ ] Add .commit()
+ - [ ] Add .revert()
+ - [ ] Tests
+
 ## Usage
 
 Staged-hyperdrive adds new methods (and behaviors) to hyperdrive.
@@ -69,6 +77,7 @@ The "staging area" is the current archive state written to disk. It includes cha
  - Owned archives:
    - All read operations provide the content in staging.
    - All write operations modify the content in staging.
+   - The .dat folder is hidden from reads and make inaccessible.
  - Unowned archives:
    - All operations pass through to hyperdrive.
    - Changes are downloaded will overwrite whatever is in staging.
@@ -76,6 +85,8 @@ The "staging area" is the current archive state written to disk. It includes cha
 To access the current committed state, or past versions, use hyperdrive's existing `checkout()` method.
 
 ## API
+
+**NOTE** StagedArchive's constructor must be given a string for `storage`. Metadata is stored under `./.dat`.
 
 #### `archive.diff(callback)`
 

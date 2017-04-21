@@ -4,7 +4,7 @@
   "description": "Hyperdrive with a staging area for local, uncommited writes (wraps hyperdrive)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "standard && tape test/*.js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +20,16 @@
   "bugs": {
     "url": "https://github.com/pfrazee/staged-hyperdrive/issues"
   },
-  "homepage": "https://github.com/pfrazee/staged-hyperdrive#readme"
+  "homepage": "https://github.com/pfrazee/staged-hyperdrive#readme",
+  "dependencies": {
+    "duplexify": "^3.5.0",
+    "hyperdrive": "8.3.2",
+    "inherits": "^2.0.3"
+  },
+  "devDependencies": {
+    "sodium-signatures": "^2.0.0",
+    "standard": "^9.0.2",
+    "tape": "^4.6.3",
+    "temporary-directory": "^1.0.2"
+  }
 }
