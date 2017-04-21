@@ -14,7 +14,6 @@ Staged-hyperdrive adds new methods (and behaviors) to hyperdrive.
 var stagedHyperdrive = require('staged-hyperdrive')
 var archive = stagedHyperdrive('./my-first-hyperdrive') // content will be stored in this folder
 
-// normal hyperdrive usage:
 archive.writeFile('/hello.txt', 'world', function (err) {
   if (err) throw err
   archive.readdir('/', function (err, list) {
@@ -23,44 +22,44 @@ archive.writeFile('/hello.txt', 'world', function (err) {
     archive.readFile('/hello.txt', 'utf-8', function (err, data) {
       if (err) throw err
       console.log(data) // prints 'world'
-      next()
     })
   })
 })
+```
 
-// staged-hyperdrive usage: commit
-function next() {
-  archive.diff(function (err, changes) {
-    if (err) throw err
-    console.log(changes) // prints [{change: 'add', name: '/hello.txt'}]
-    archive.commit(function (err) {
-      if (err) throw err
-      archive.diff(function (err, changes) {
-        if (err) throw err
-        console.log(changes) // prints []
-        next2()
-      })
-    })
-  })
-}
+At this point, the archive is still unchanged. The changes must be committed:
 
-// staged-hyperdrive usage: revert
-function next2() {
-  archive.writeFile('/hello.txt', 'universe!', function (err) {
+```js
+archive.diff(function (err, changes) {
+  if (err) throw err
+  console.log(changes) // prints [{change: 'add', name: '/hello.txt'}]
+  archive.commit(function (err) {
     if (err) throw err
     archive.diff(function (err, changes) {
       if (err) throw err
-      console.log(changes) // prints [{change: 'modify', name: '/hello.txt'}]
-      archive.revert('/hello.txt', function (err) {
+      console.log(changes) // prints []
+    })
+  })
+})
+```
+
+Changes can also be reverted after write:
+
+```js
+archive.writeFile('/hello.txt', 'universe!', function (err) {
+  if (err) throw err
+  archive.diff(function (err, changes) {
+    if (err) throw err
+    console.log(changes) // prints [{change: 'modify', name: '/hello.txt'}]
+    archive.revert('/hello.txt', function (err) {
+      if (err) throw err
+      archive.readFile('/hello.txt', 'utf-8', function (err, data) {
         if (err) throw err
-        archive.readFile('/hello.txt', 'utf-8', function (err, data) {
-          if (err) throw err
-          console.log(data) // prints 'world'
-        })
+        console.log(data) // prints 'world'
       })
     })
   })
-}
+})
 ```
 
 ## Details
