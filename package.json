@@ -1,0 +1,24 @@
+{
+  "name": "staged-hyperdrive",
+  "version": "1.0.0",
+  "description": "Hyperdrive with a staging area for local, uncommited writes (wraps hyperdrive)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pfrazee/staged-hyperdrive.git"
+  },
+  "keywords": [
+    "hyperdrive",
+    "dat",
+    "staging"
+  ],
+  "author": "Paul Frazee <pfrazee@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pfrazee/staged-hyperdrive/issues"
+  },
+  "homepage": "https://github.com/pfrazee/staged-hyperdrive#readme"
+}
