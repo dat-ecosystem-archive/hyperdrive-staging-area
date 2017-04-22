@@ -11,9 +11,10 @@ npm install staged-hyperdrive
 ## TODO
 
  - [ ] Copy received files into the staging area
- - [ ] Add .diffStaging()
+ - [x] Add .diffStaging()
  - [x] Add .commit()
  - [x] Add .revert()
+ - [ ] Add support for .datignore
  - [ ] Tests
 
 ## Usage

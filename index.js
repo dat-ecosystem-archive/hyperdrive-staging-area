@@ -3,9 +3,10 @@ var path = require('path')
 var fs = require('fs')
 var Hyperdrive = require('hyperdrive')
 var duplexify = require('duplexify')
+var pump = require('pump')
 var inherits = require('inherits')
 var util = require('./util')
-var syncStaging = require('./sync-staging')
+var diffStaging = require('./diff')
 var isPathDotDat = util.isPathDotDat
 
 module.exports = StagedHyperdrive
@@ -22,9 +23,7 @@ inherits(StagedHyperdrive, Hyperdrive)
 // new methods
 // =
 
-StagedHyperdrive.prototype.diffStaging = function () {
-
-}
+StagedHyperdrive.prototype.diffStaging = diffStaging
 
 StagedHyperdrive.prototype.commit = function (cb) {
   var self = this
@@ -39,17 +38,20 @@ StagedHyperdrive.prototype.commit = function (cb) {
 
       // get next diff
       var d = diffs[i++]
-      if (!d) return cb(diffs)
+      if (!d) return cb(null, diffs)
 
       // handle each op
       var op = d.change + d.type
       if (op === 'adddirectory') {
-        Hyperdrive.prototype.mkdir.call(self, d.name, next)
+        console.log('mkdir', d.name)
+        Hyperdrive.prototype.mkdir.call(self, d.name, null, next)
       }
       if (op === 'deldirectory') {
-        Hyperdrive.prototype.rmdir.call(self, d.name, next)
+        console.log('rmdir', d.name)
+        Hyperdrive.prototype._del.call(self, d.name, next)
       }
       if (op === 'addfile' || op === 'modifyfile') {
+        console.log('writeFile', d.name)
         pump(
           fs.createReadStream(util.join(self.stagingPath, d.name)),
           Hyperdrive.prototype.createWriteStream.call(self, d.name),
@@ -57,13 +59,14 @@ StagedHyperdrive.prototype.commit = function (cb) {
         )
       }
       if (op === 'delfile') {
-        Hyperdrive.prototype.unlink.call(self, d.name, next)
+        console.log('unlink', d.name)
+        Hyperdrive.prototype._del.call(self, d.name, next)
       }
     }
   })
 }
 
-StagedHyperdrive.prototype.revert = function () {
+StagedHyperdrive.prototype.revert = function (cb) {
   var self = this
   this.diffStaging(function (err, diffs) {
     if (err) return cb(err)
@@ -76,20 +79,24 @@ StagedHyperdrive.prototype.revert = function () {
 
       // get next diff
       var d = diffs[i--]
-      if (!d) return cb(diffs)
+      if (!d) return cb(null, diffs)
 
       // handle each op by doing the opposite action
       var op = d.change + d.type
       if (op === 'adddirectory') {
+        console.log('rmdir', d.name)
         fs.rmdir(util.join(self.stagingPath, d.name), next)
       }
       if (op === 'deldirectory') {
+        console.log('mkdir', d.name)
         fs.mkdir(util.join(self.stagingPath, d.name), next)
       }
       if (op === 'addfile') {
-        fs.unlink(d.name, next)
+        console.log('unlink', d.name)
+        fs.unlink(util.join(self.stagingPath, d.name), next)
       }
       if (op === 'modifyfile' || op === 'delfile') {
+        console.log('writeFile', d.name)
         pump(
           Hyperdrive.prototype.createReadStream.call(self, d.name),
           fs.createWriteStream(util.join(self.stagingPath, d.name)),
@@ -97,7 +104,7 @@ StagedHyperdrive.prototype.revert = function () {
         )
       }
     }
-  }) 
+  })
 }
 
 // wrappers around existing methods

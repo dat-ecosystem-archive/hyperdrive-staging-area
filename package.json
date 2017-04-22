@@ -22,9 +22,13 @@
   },
   "homepage": "https://github.com/pfrazee/staged-hyperdrive#readme",
   "dependencies": {
+    "anymatch": "^1.3.0",
     "duplexify": "^3.5.0",
+    "es6-promisify": "^5.0.0",
     "hyperdrive": "8.3.2",
-    "inherits": "^2.0.3"
+    "inherits": "^2.0.3",
+    "pump": "^1.0.2",
+    "stream-equal": "^1.0.0"
   },
   "devDependencies": {
     "sodium-signatures": "^2.0.0",
