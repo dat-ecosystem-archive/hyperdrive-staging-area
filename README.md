@@ -41,12 +41,12 @@ archive.writeFile('/hello.txt', 'world', function (err) {
 At this point, the archive is still unchanged. The changes must be committed:
 
 ```js
-archive.diff(function (err, changes) {
+archive.diffStaging(function (err, changes) {
   if (err) throw err
-  console.log(changes) // prints [{change: 'add', name: '/hello.txt'}]
+  console.log(changes) // prints [{change: 'add', type: 'file', name: '/hello.txt'}]
   archive.commit(function (err) {
     if (err) throw err
-    archive.diff(function (err, changes) {
+    archive.diffStaging(function (err, changes) {
       if (err) throw err
       console.log(changes) // prints []
     })
@@ -59,9 +59,9 @@ Changes can also be reverted after write:
 ```js
 archive.writeFile('/hello.txt', 'universe!', function (err) {
   if (err) throw err
-  archive.diff(function (err, changes) {
+  archive.diffStaging(function (err, changes) {
     if (err) throw err
-    console.log(changes) // prints [{change: 'modify', name: '/hello.txt'}]
+    console.log(changes) // prints [{change: 'modify', type: 'file', name: '/hello.txt'}]
     archive.revert('/hello.txt', function (err) {
       if (err) throw err
       archive.readFile('/hello.txt', 'utf-8', function (err, data) {
