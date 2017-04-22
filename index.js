@@ -16,6 +16,14 @@ function StagedHyperdrive (stagingPath, key, opts) {
   if (!(this instanceof StagedHyperdrive)) return new StagedHyperdrive(stagingPath, key, opts)
   this.stagingPath = stagingPath
   Hyperdrive.call(this, path.join(stagingPath, '.dat'), key, opts)
+
+  // autosync non-owned archives
+  var self = this
+  this.ready(function () {
+    if (!self.writable) {
+      self.metadata.on('append', self.revert.bind(self))
+    }
+  })
 }
 
 inherits(StagedHyperdrive, Hyperdrive)
@@ -26,6 +34,7 @@ inherits(StagedHyperdrive, Hyperdrive)
 StagedHyperdrive.prototype.diffStaging = diffStaging
 
 StagedHyperdrive.prototype.commit = function (cb) {
+  cb = cb || function () {}
   var self = this
   this.diffStaging(function (err, diffs) {
     if (err) return cb(err)
@@ -67,6 +76,7 @@ StagedHyperdrive.prototype.commit = function (cb) {
 }
 
 StagedHyperdrive.prototype.revert = function (cb) {
+  cb = cb || function () {}
   var self = this
   this.diffStaging(function (err, diffs) {
     if (err) return cb(err)

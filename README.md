@@ -10,7 +10,7 @@ npm install staged-hyperdrive
 
 ## TODO
 
- - [ ] Copy received files into the staging area
+ - [x] Copy received files into the staging area
  - [x] Add .diffStaging()
  - [x] Add .commit()
  - [x] Add .revert()

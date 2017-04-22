@@ -1,11 +1,21 @@
 var tape = require('tape')
+var fs = require('fs')
+var path = require('path')
 var create = require('./helpers/create')
 
 var archive
+var clone
 
-tape('create archive', function (t) {
+tape('create archives', function (t) {
   archive = create()
-  t.end()
+  archive.ready(function () {
+    clone = create(archive.key)
+
+    var rs = archive.replicate({live: true})
+    rs.pipe(clone.replicate({live: true})).pipe(rs)
+
+    t.end()
+  })
 })
 
 tape('add /hello.txt', function (t) {
@@ -68,6 +78,22 @@ tape('revert', function (t) {
   })
 })
 
+tape('replicate (archive)', function (t) {
+  clone.readdir('/', function (err, files) {
+    t.error(err, 'no error')
+    t.same(files.length, 0)
+    t.end()
+  })
+})
+
+tape('replicate (mirror)', function (t) {
+  fs.readdir(clone.stagingPath, function (err, files) {
+    t.error(err, 'no error')
+    t.deepEqual(files, ['.dat'])
+    t.end()
+  })
+})
+
 tape('add /hello.txt', function (t) {
   archive.writeFile('/hello.txt', 'world', function (err) {
     t.error(err, 'no error')
@@ -120,6 +146,38 @@ tape('commit', function (t) {
       t.error(err, 'no error')
       t.same(diffs.length, 0)
       t.end()
+    })
+  })
+})
+
+tape('replicate (archive)', function (t) {
+  clone.readdir('/', function (err, files) {
+    t.error(err, 'no error')
+    t.deepEqual(files.sort(), ['dir', 'hello.txt'])
+    clone.readFile('/hello.txt', 'utf8', function (err, v) {
+      t.error(err, 'no error')
+      t.same(v, 'world')
+      clone.readFile('/dir/hello.txt', 'utf8', function (err, v) {
+        t.error(err, 'no error')
+        t.same(v, 'universe')
+        t.end()
+      })
+    })
+  })
+})
+
+tape('replicate (mirror)', function (t) {
+  fs.readdir(clone.stagingPath, function (err, files) {
+    t.error(err, 'no error')
+    t.deepEqual(files.sort(), ['.dat', 'dir', 'hello.txt'])
+    fs.readFile(path.join(clone.stagingPath, '/hello.txt'), 'utf8', function (err, v) {
+      t.error(err, 'no error')
+      t.same(v, 'world')
+      fs.readFile(path.join(clone.stagingPath, '/dir/hello.txt'), 'utf8', function (err, v) {
+        t.error(err, 'no error')
+        t.same(v, 'universe')
+        t.end()
+      })
     })
   })
 })
@@ -240,6 +298,38 @@ tape('revert', function (t) {
             })
           })
         })
+      })
+    })
+  })
+})
+
+tape('replicate (archive)', function (t) {
+  clone.readdir('/', function (err, files) {
+    t.error(err, 'no error')
+    t.deepEqual(files.sort(), ['dir', 'hello.txt'])
+    clone.readFile('/hello.txt', 'utf8', function (err, v) {
+      t.error(err, 'no error')
+      t.same(v, 'world')
+      clone.readFile('/dir/hello.txt', 'utf8', function (err, v) {
+        t.error(err, 'no error')
+        t.same(v, 'universe')
+        t.end()
+      })
+    })
+  })
+})
+
+tape('replicate (mirror)', function (t) {
+  fs.readdir(clone.stagingPath, function (err, files) {
+    t.error(err, 'no error')
+    t.deepEqual(files.sort(), ['.dat', 'dir', 'hello.txt'])
+    fs.readFile(path.join(clone.stagingPath, '/hello.txt'), 'utf8', function (err, v) {
+      t.error(err, 'no error')
+      t.same(v, 'world')
+      fs.readFile(path.join(clone.stagingPath, '/dir/hello.txt'), 'utf8', function (err, v) {
+        t.error(err, 'no error')
+        t.same(v, 'universe')
+        t.end()
       })
     })
   })

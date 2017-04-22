@@ -27,6 +27,7 @@
     "es6-promisify": "^5.0.0",
     "hyperdrive": "8.3.2",
     "inherits": "^2.0.3",
+    "mirror-folder": "^2.0.0",
     "pump": "^1.0.2",
     "stream-equal": "^1.0.0"
   },
