@@ -1,17 +1,15 @@
-# staged-hyperdrive
+# hyperdrive-staging-area
 
-Hyperdrive with a staging area for local, uncommited writes.
-
-**NOTE** Non-owned archives have all current files downloaded automatically.
+Staging area for local, uncommited writes that can sync to a hyperdrive
 
 ```
-npm install staged-hyperdrive
+npm install hyperdrive-staging-area
 ```
 
 ## TODO
 
  - [x] Copy received files into the staging area
- - [x] Add .diffStaging()
+ - [x] Add .diff()
  - [x] Add .commit()
  - [x] Add .revert()
  - [ ] Add support for .datignore
@@ -19,18 +17,19 @@ npm install staged-hyperdrive
 
 ## Usage
 
-Staged-hyperdrive adds new methods (and behaviors) to hyperdrive.
+hyperdrive-staging-area provides an fs-compatible object, plus a few additional methods
 
 ```js
-var stagedHyperdrive = require('staged-hyperdrive')
-var archive = stagedHyperdrive('./my-first-hyperdrive') // content will be stored in this folder
+var HSA = require('hyperdrive-staging-area')
+var archive = hyperdrive('./my-first-hyperdrive-meta') // metadata will be stored in this folder
+var staging = HSA(archive, './my-first-hyperdrive', true) // content will be stored in this folder
 
-archive.writeFile('/hello.txt', 'world', function (err) {
+staging.writeFile('/hello.txt', 'world', function (err) {
   if (err) throw err
-  archive.readdir('/', function (err, list) {
+  staging.readdir('/', function (err, list) {
     if (err) throw err
     console.log(list) // prints ['hello.txt']
-    archive.readFile('/hello.txt', 'utf-8', function (err, data) {
+    staging.readFile('/hello.txt', 'utf-8', function (err, data) {
       if (err) throw err
       console.log(data) // prints 'world'
     })
@@ -38,32 +37,25 @@ archive.writeFile('/hello.txt', 'world', function (err) {
 })
 ```
 
-At this point, the archive is still unchanged. The changes must be committed:
+At this point, the archive is still unchanged.
 
 ```js
-archive.diffStaging(function (err, changes) {
-  if (err) throw err
-  console.log(changes) // prints [{change: 'add', type: 'file', name: '/hello.txt'}]
-  archive.commit(function (err) {
-    if (err) throw err
-    archive.diffStaging(function (err, changes) {
-      if (err) throw err
-      console.log(changes) // prints []
-    })
-  })
+archive.readFile('/hello.txt', 'utf-8', function (err) {
+  console.log(err) // => NotFound
 })
 ```
 
-Changes can also be reverted after write:
+To be applied to the archive, the changes must be committed:
 
 ```js
-archive.writeFile('/hello.txt', 'universe!', function (err) {
+staging.diff(function (err, changes) {
   if (err) throw err
-  archive.diffStaging(function (err, changes) {
+  console.log(changes) // prints [{change: 'add', type: 'file', path: '/hello.txt'}]
+  staging.commit(function (err) {
     if (err) throw err
-    console.log(changes) // prints [{change: 'modify', type: 'file', name: '/hello.txt'}]
-    archive.revert('/hello.txt', function (err) {
+    staging.diff(function (err, changes) {
       if (err) throw err
+      console.log(changes) // prints []
       archive.readFile('/hello.txt', 'utf-8', function (err, data) {
         if (err) throw err
         console.log(data) // prints 'world'
@@ -73,43 +65,58 @@ archive.writeFile('/hello.txt', 'universe!', function (err) {
 })
 ```
 
-## Details
+Changes can also be reverted after writing them to staging.
 
-The "staging area" is the current archive state written to disk. It includes changes which have been made locally, but which may not have been written the the archive's internal logs. The archive operations have been modified as follows:
-
- - Owned archives:
-   - All read operations provide the content in staging.
-   - All write operations modify the content in staging.
-   - The .dat folder is hidden from reads and make inaccessible.
- - Unowned archives:
-   - All operations pass through to hyperdrive.
-   - Changes are downloaded will overwrite whatever is in staging.
-
-To access the current committed state, or past versions, use hyperdrive's existing `checkout()` method.
+```js
+staging.writeFile('/hello.txt', 'universe!', function (err) {
+  if (err) throw err
+  staging.diff(function (err, changes) {
+    if (err) throw err
+    console.log(changes) // prints [{change: 'mod', type: 'file', path: '/hello.txt'}]
+    staging.revert(function (err) {
+      if (err) throw err
+      staging.readFile('/hello.txt', 'utf-8', function (err, data) {
+        if (err) throw err
+        console.log(data) // prints 'world'
+      })
+    })
+  })
+})
+```
 
 ## API
 
-**NOTE** StagedArchive's constructor must be given a string for `storage`. Metadata is stored under `./.dat`.
+#### `var staging = HyperdriveStagingArea(archive, stagingPath)`
 
-#### `archive.diffStaging(cb)`
+Create a staging area for `archive` at the given `stagingPath`.
+
+#### `staging.diff(cb)`
 
 List the changes currently in staging. Output looks like:
 
 ```js
 [
   {
-    change: 'add' | 'modify' | 'del'
-    type: 'directory' | 'file'
-    name: String (path of the file)
+    change: 'add' | 'mod' | 'del'
+    type: 'dir' | 'file'
+    path: String (path of the file)
   },
   ...
 ]
 ```
 
-#### `archive.commit(callback)`
+#### `staging.commit(callback)`
 
-Write all changes to the archive. Output is the same as `diffStaging()`.
+Write all changes to the archive.
 
-#### `archive.revert()`
+#### `staging.revert()`
 
-Undo all changes.  Output is the same as `diffStaging()`, but indicates that those changes were *not* applied. Output is the same as `diffStaging()`.
+Undo all changes so that staging is reverted to the archive stage.
+
+#### `staging.startAutoSync()`
+
+Listens for updates to the archive and automatically reverts the staging area when a new entry is appended. Useful for syncing the staging for downloaded archives.
+
+#### `staging.stopAutoSync()`
+
+Stop syncing the staging area.

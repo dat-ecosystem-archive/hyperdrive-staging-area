@@ -1,7 +1,8 @@
 var fs = require('fs')
 var os = require('os')
 var path = require('path')
-var StagedHyperdrive = require('../../')
+var hyperdrive = require('hyperdrive')
+var staging = require('../../')
 
 function mktmpdir () {
   if (fs.mkdtempSync) {
@@ -13,5 +14,7 @@ function mktmpdir () {
 }
 
 module.exports = function (key, opts) {
-  return new StagedHyperdrive(mktmpdir(), key, opts)
+  var archive = hyperdrive(mktmpdir(), key, opts)
+  archive.staging = staging(archive, mktmpdir())
+  return archive
 }

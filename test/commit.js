@@ -11,6 +11,7 @@ tape('create archives', function (t) {
   archive.ready(function () {
     clone = create(archive.key)
 
+    clone.staging.startAutoSync()
     var rs = archive.replicate({live: true})
     rs.pipe(clone.replicate({live: true})).pipe(rs)
 
@@ -19,12 +20,12 @@ tape('create archives', function (t) {
 })
 
 tape('add /hello.txt', function (t) {
-  archive.writeFile('/hello.txt', 'world', function (err) {
+  archive.staging.writeFile('/hello.txt', 'world', function (err) {
     t.error(err, 'no error')
-    archive.diffStaging(function (err, diffs) {
+    archive.staging.diff(function (err, diffs) {
       t.error(err, 'no error')
       t.deepEqual(diffs, [
-        {change: 'add', type: 'file', name: '/hello.txt'}
+        {change: 'add', type: 'file', path: '/hello.txt'}
       ])
       t.end()
     })
@@ -32,14 +33,13 @@ tape('add /hello.txt', function (t) {
 })
 
 tape('add /dir/', function (t) {
-  archive.mkdir('/dir', function (err) {
+  archive.staging.mkdir('/dir', function (err) {
     t.error(err, 'no error')
-    archive.diffStaging(function (err, diffs) {
+    archive.staging.diff(function (err, diffs) {
       t.error(err, 'no error')
-      sortDiffs(diffs)
-      t.deepEqual(diffs, [
-        {change: 'add', type: 'directory', name: '/dir'},
-        {change: 'add', type: 'file', name: '/hello.txt'}
+      t.deepEqual(sortDiffs(diffs), [
+        {change: 'add', type: 'dir', path: '/dir'},
+        {change: 'add', type: 'file', path: '/hello.txt'}
       ])
       t.end()
     })
@@ -47,15 +47,14 @@ tape('add /dir/', function (t) {
 })
 
 tape('add /dir/hello.txt', function (t) {
-  archive.writeFile('/dir/hello.txt', 'universe', function (err) {
+  archive.staging.writeFile('/dir/hello.txt', 'universe', function (err) {
     t.error(err, 'no error')
-    archive.diffStaging(function (err, diffs) {
+    archive.staging.diff(function (err, diffs) {
       t.error(err, 'no error')
-      sortDiffs(diffs)
-      t.deepEqual(diffs, [
-        {change: 'add', type: 'directory', name: '/dir'},
-        {change: 'add', type: 'file', name: '/dir/hello.txt'},
-        {change: 'add', type: 'file', name: '/hello.txt'}
+      t.deepEqual(sortDiffs(diffs), [
+        {change: 'add', type: 'dir', path: '/dir'},
+        {change: 'add', type: 'file', path: '/dir/hello.txt'},
+        {change: 'add', type: 'file', path: '/hello.txt'}
       ])
       t.end()
     })
@@ -63,10 +62,11 @@ tape('add /dir/hello.txt', function (t) {
 })
 
 tape('commit', function (t) {
-  archive.commit(function (err, diffs) {
+  archive.staging.commit(function (err, diffs) {
     t.error(err, 'no error')
     t.same(diffs.length, 3)
-    archive.diffStaging(function (err, diffs) {
+    console.log('done, testing')
+    archive.staging.diff(function (err, diffs) {
       t.error(err, 'no error')
       t.same(diffs.length, 0)
       t.end()
@@ -75,13 +75,13 @@ tape('commit', function (t) {
 })
 
 tape('replicate (archive)', function (t) {
-  clone.readdir('/', function (err, files) {
+  clone.staging.readdir('/', function (err, files) {
     t.error(err, 'no error')
     t.deepEqual(files.sort(), ['dir', 'hello.txt'])
-    clone.readFile('/hello.txt', 'utf8', function (err, v) {
+    clone.staging.readFile('/hello.txt', 'utf8', function (err, v) {
       t.error(err, 'no error')
       t.same(v, 'world')
-      clone.readFile('/dir/hello.txt', 'utf8', function (err, v) {
+      clone.staging.readFile('/dir/hello.txt', 'utf8', function (err, v) {
         t.error(err, 'no error')
         t.same(v, 'universe')
         t.end()
@@ -91,13 +91,13 @@ tape('replicate (archive)', function (t) {
 })
 
 tape('replicate (mirror)', function (t) {
-  fs.readdir(clone.stagingPath, function (err, files) {
+  fs.readdir(clone.staging.path, function (err, files) {
     t.error(err, 'no error')
-    t.deepEqual(files.sort(), ['.dat', 'dir', 'hello.txt'])
-    fs.readFile(path.join(clone.stagingPath, '/hello.txt'), 'utf8', function (err, v) {
+    t.deepEqual(files.sort(), ['dir', 'hello.txt'])
+    fs.readFile(path.join(clone.staging.path, '/hello.txt'), 'utf8', function (err, v) {
       t.error(err, 'no error')
       t.same(v, 'world')
-      fs.readFile(path.join(clone.stagingPath, '/dir/hello.txt'), 'utf8', function (err, v) {
+      fs.readFile(path.join(clone.staging.path, '/dir/hello.txt'), 'utf8', function (err, v) {
         t.error(err, 'no error')
         t.same(v, 'universe')
         t.end()
@@ -107,13 +107,12 @@ tape('replicate (mirror)', function (t) {
 })
 
 tape('modify /hello.txt', function (t) {
-  archive.writeFile('/hello.txt', 'world!!', function (err) {
+  archive.staging.writeFile('/hello.txt', 'world!!', function (err) {
     t.error(err, 'no error')
-    archive.diffStaging(function (err, diffs) {
+    archive.staging.diff(function (err, diffs) {
       t.error(err, 'no error')
-      sortDiffs(diffs)
-      t.deepEqual(diffs, [
-        {change: 'modify', type: 'file', name: '/hello.txt'}
+      t.deepEqual(sortDiffs(diffs), [
+        {change: 'mod', type: 'file', path: '/hello.txt'}
       ])
       t.end()
     })
@@ -121,14 +120,13 @@ tape('modify /hello.txt', function (t) {
 })
 
 tape('modify /dir/hello.txt', function (t) {
-  archive.writeFile('/dir/hello.txt', 'universe!!', function (err) {
+  archive.staging.writeFile('/dir/hello.txt', 'universe!!', function (err) {
     t.error(err, 'no error')
-    archive.diffStaging(function (err, diffs) {
+    archive.staging.diff(function (err, diffs) {
       t.error(err, 'no error')
-      sortDiffs(diffs)
-      t.deepEqual(diffs, [
-        {change: 'modify', type: 'file', name: '/dir/hello.txt'},
-        {change: 'modify', type: 'file', name: '/hello.txt'}
+      t.deepEqual(sortDiffs(diffs), [
+        {change: 'mod', type: 'file', path: '/dir/hello.txt'},
+        {change: 'mod', type: 'file', path: '/hello.txt'}
       ])
       t.end()
     })
@@ -136,14 +134,13 @@ tape('modify /dir/hello.txt', function (t) {
 })
 
 tape('remove /hello.txt', function (t) {
-  archive.unlink('/hello.txt', function (err) {
+  archive.staging.unlink('/hello.txt', function (err) {
     t.error(err, 'no error')
-    archive.diffStaging(function (err, diffs) {
+    archive.staging.diff(function (err, diffs) {
       t.error(err, 'no error')
-      sortDiffs(diffs)
-      t.deepEqual(diffs, [
-        {change: 'modify', type: 'file', name: '/dir/hello.txt'},
-        {change: 'del', type: 'file', name: '/hello.txt'}
+      t.deepEqual(sortDiffs(diffs), [
+        {change: 'mod', type: 'file', path: '/dir/hello.txt'},
+        {change: 'del', type: 'file', path: '/hello.txt'}
       ])
       t.end()
     })
@@ -151,15 +148,14 @@ tape('remove /hello.txt', function (t) {
 })
 
 tape('add /hello2.txt', function (t) {
-  archive.writeFile('/hello2.txt', 'computer', function (err) {
+  archive.staging.writeFile('/hello2.txt', 'computer', function (err) {
     t.error(err, 'no error')
-    archive.diffStaging(function (err, diffs) {
+    archive.staging.diff(function (err, diffs) {
       t.error(err, 'no error')
-      sortDiffs(diffs)
-      t.deepEqual(diffs, [
-        {change: 'modify', type: 'file', name: '/dir/hello.txt'},
-        {change: 'del', type: 'file', name: '/hello.txt'},
-        {change: 'add', type: 'file', name: '/hello2.txt'}
+      t.deepEqual(sortDiffs(diffs), [
+        {change: 'mod', type: 'file', path: '/dir/hello.txt'},
+        {change: 'del', type: 'file', path: '/hello.txt'},
+        {change: 'add', type: 'file', path: '/hello2.txt'}
       ])
       t.end()
     })
@@ -167,15 +163,14 @@ tape('add /hello2.txt', function (t) {
 })
 
 tape('remove /dir/hello.txt', function (t) {
-  archive.unlink('/dir/hello.txt', function (err) {
+  archive.staging.unlink('/dir/hello.txt', function (err) {
     t.error(err, 'no error')
-    archive.diffStaging(function (err, diffs) {
+    archive.staging.diff(function (err, diffs) {
       t.error(err, 'no error')
-      sortDiffs(diffs)
-      t.deepEqual(diffs, [
-        {change: 'del', type: 'file', name: '/dir/hello.txt'},
-        {change: 'del', type: 'file', name: '/hello.txt'},
-        {change: 'add', type: 'file', name: '/hello2.txt'}
+      t.deepEqual(sortDiffs(diffs), [
+        {change: 'del', type: 'file', path: '/dir/hello.txt'},
+        {change: 'del', type: 'file', path: '/hello.txt'},
+        {change: 'add', type: 'file', path: '/hello2.txt'}
       ])
       t.end()
     })
@@ -183,16 +178,15 @@ tape('remove /dir/hello.txt', function (t) {
 })
 
 tape('remove /dir/', function (t) {
-  archive.rmdir('/dir/', function (err) {
+  archive.staging.rmdir('/dir', function (err) {
     t.error(err, 'no error')
-    archive.diffStaging(function (err, diffs) {
+    archive.staging.diff(function (err, diffs) {
       t.error(err, 'no error')
-      sortDiffs(diffs)
-      t.deepEqual(diffs, [
-        {change: 'del', type: 'directory', name: '/dir'},
-        {change: 'del', type: 'file', name: '/dir/hello.txt'},
-        {change: 'del', type: 'file', name: '/hello.txt'},
-        {change: 'add', type: 'file', name: '/hello2.txt'}
+      t.deepEqual(sortDiffs(diffs), [
+        {change: 'del', type: 'dir', path: '/dir'},
+        {change: 'del', type: 'file', path: '/dir/hello.txt'},
+        {change: 'del', type: 'file', path: '/hello.txt'},
+        {change: 'add', type: 'file', path: '/hello2.txt'}
       ])
       t.end()
     })
@@ -200,10 +194,10 @@ tape('remove /dir/', function (t) {
 })
 
 tape('commit', function (t) {
-  archive.commit(function (err, diffs) {
+  archive.staging.commit(function (err, diffs) {
     t.error(err, 'no error')
     t.same(diffs.length, 4)
-    archive.diffStaging(function (err, diffs) {
+    archive.staging.diff(function (err, diffs) {
       t.error(err, 'no error')
       t.same(diffs.length, 0)
       t.end()
@@ -212,10 +206,10 @@ tape('commit', function (t) {
 })
 
 tape('replicate (archive)', function (t) {
-  clone.readdir('/', function (err, files) {
+  clone.staging.readdir('/', function (err, files) {
     t.error(err, 'no error')
     t.deepEqual(files.sort(), ['hello2.txt'])
-    clone.readFile('/hello2.txt', 'utf8', function (err, v) {
+    clone.staging.readFile('/hello2.txt', 'utf8', function (err, v) {
       t.error(err, 'no error')
       t.same(v, 'computer')
       t.end()
@@ -224,10 +218,10 @@ tape('replicate (archive)', function (t) {
 })
 
 tape('replicate (mirror)', function (t) {
-  fs.readdir(clone.stagingPath, function (err, files) {
+  fs.readdir(clone.staging.path, function (err, files) {
     t.error(err, 'no error')
-    t.deepEqual(files.sort(), ['.dat', 'hello2.txt'])
-    fs.readFile(path.join(clone.stagingPath, '/hello2.txt'), 'utf8', function (err, v) {
+    t.deepEqual(files.sort(), ['hello2.txt'])
+    fs.readFile(path.join(clone.staging.path, '/hello2.txt'), 'utf8', function (err, v) {
       t.error(err, 'no error')
       t.same(v, 'computer')
       t.end()
@@ -236,7 +230,9 @@ tape('replicate (mirror)', function (t) {
 })
 
 function sortDiffs (diffs) {
+  diffs = diffs.slice() // clone array
   diffs.sort(function (a, b) {
-    return a.name.localeCompare(b.name)
+    return a.path.localeCompare(b.path)
   })
+  return diffs
 }
