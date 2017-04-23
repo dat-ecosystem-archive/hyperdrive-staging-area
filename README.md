@@ -1,28 +1,20 @@
 # hyperdrive-staging-area
 
-Staging area for local, uncommited writes that can sync to a hyperdrive
+Staging area for local, uncommited writes that can sync to a hyperdrive. Respects `.datignore`.
 
 ```
 npm install hyperdrive-staging-area
 ```
-
-## TODO
-
- - [x] Copy received files into the staging area
- - [x] Add .diff()
- - [x] Add .commit()
- - [x] Add .revert()
- - [ ] Add support for .datignore
- - [x] Tests
 
 ## Usage
 
 hyperdrive-staging-area provides an fs-compatible object, plus a few additional methods
 
 ```js
-var HSA = require('hyperdrive-staging-area')
+var hyperdrive = require('hyperdrive')
+var hyperstaging = require('hyperdrive-staging-area')
 var archive = hyperdrive('./my-first-hyperdrive-meta') // metadata will be stored in this folder
-var staging = HSA(archive, './my-first-hyperdrive', true) // content will be stored in this folder
+var staging = hyperstaging(archive, './my-first-hyperdrive') // content will be stored in this folder
 
 staging.writeFile('/hello.txt', 'world', function (err) {
   if (err) throw err
@@ -98,7 +90,7 @@ staging.writeFile('/hello.txt', 'universe!', function (err) {
 
 Create a staging area for `archive` at the given `stagingPath`.
 
-#### `staging.diff(cb)`
+#### `staging.diff(opts, cb)`
 
 List the changes currently in staging. Output looks like:
 
@@ -113,13 +105,37 @@ List the changes currently in staging. Output looks like:
 ]
 ```
 
-#### `staging.commit(cb)`
+Options include:
+
+```
+{
+  skipIgnore: false // dont use the .datignore rules
+}
+```
+
+#### `staging.commit(opts, cb)`
 
 Write all changes to the archive.
 
-#### `staging.revert(cb)`
+Options include:
+
+```
+{
+  skipIgnore: false // dont use the .datignore rules
+}
+```
+
+#### `staging.revert(opts, cb)`
 
 Undo all changes so that staging is reverted to the archive stage.
+
+Options include:
+
+```
+{
+  skipIgnore: false // dont use the .datignore rules
+}
+```
 
 #### `staging.startAutoSync()`
 
