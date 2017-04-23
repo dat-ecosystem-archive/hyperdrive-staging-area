@@ -13,7 +13,7 @@ npm install hyperdrive-staging-area
  - [x] Add .commit()
  - [x] Add .revert()
  - [ ] Add support for .datignore
- - [ ] Tests
+ - [x] Tests
 
 ## Usage
 
