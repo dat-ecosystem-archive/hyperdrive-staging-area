@@ -26,9 +26,11 @@ var staging = HSA(archive, './my-first-hyperdrive', true) // content will be sto
 
 staging.writeFile('/hello.txt', 'world', function (err) {
   if (err) throw err
+
   staging.readdir('/', function (err, list) {
     if (err) throw err
     console.log(list) // prints ['hello.txt']
+
     staging.readFile('/hello.txt', 'utf-8', function (err, data) {
       if (err) throw err
       console.log(data) // prints 'world'
@@ -51,11 +53,14 @@ To be applied to the archive, the changes must be committed:
 staging.diff(function (err, changes) {
   if (err) throw err
   console.log(changes) // prints [{change: 'add', type: 'file', path: '/hello.txt'}]
+
   staging.commit(function (err) {
     if (err) throw err
+
     staging.diff(function (err, changes) {
       if (err) throw err
       console.log(changes) // prints []
+
       archive.readFile('/hello.txt', 'utf-8', function (err, data) {
         if (err) throw err
         console.log(data) // prints 'world'
@@ -70,11 +75,14 @@ Changes can also be reverted after writing them to staging.
 ```js
 staging.writeFile('/hello.txt', 'universe!', function (err) {
   if (err) throw err
+
   staging.diff(function (err, changes) {
     if (err) throw err
     console.log(changes) // prints [{change: 'mod', type: 'file', path: '/hello.txt'}]
+
     staging.revert(function (err) {
       if (err) throw err
+      
       staging.readFile('/hello.txt', 'utf-8', function (err, data) {
         if (err) throw err
         console.log(data) // prints 'world'
@@ -105,11 +113,11 @@ List the changes currently in staging. Output looks like:
 ]
 ```
 
-#### `staging.commit(callback)`
+#### `staging.commit(cb)`
 
 Write all changes to the archive.
 
-#### `staging.revert()`
+#### `staging.revert(cb)`
 
 Undo all changes so that staging is reverted to the archive stage.
 
