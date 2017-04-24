@@ -1,6 +1,4 @@
 var tape = require('tape')
-var fs = require('fs')
-var path = require('path')
 var create = require('./helpers/create')
 
 var archive

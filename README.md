@@ -90,6 +90,22 @@ staging.writeFile('/hello.txt', 'universe!', function (err) {
 
 Create a staging area for `archive` at the given `stagingPath`.
 
+#### `staging.path`
+
+Path to staging folder.
+
+#### `staging.isStaging`
+
+True
+
+#### `staging.key`
+
+Archive key.
+
+#### `staging.writable`
+
+Is the archive writable?
+
 #### `staging.diff(opts, cb)`
 
 List the changes currently in staging. Output looks like:

@@ -9,12 +9,15 @@ module.exports = setup
 function setup (archive, stagingPath) {
   // setup staging object
   var staging = new ScopedFS(stagingPath)
+  staging.isStaging = true
   staging.path = stagingPath
   staging.diff = (opts, cb) => diffStaging(archive, stagingPath, opts, cb)
   staging.commit = (opts, cb) => commit(archive, stagingPath, opts, cb)
   staging.revert = (opts, cb) => revert(archive, stagingPath, opts, cb)
   staging.startAutoSync = () => archive.metadata.on('append', onAppend)
   staging.stopAutoSync = () => archive.metadata.removeEventListener('append', onAppend)
+  Object.defineProperty(staging, 'key', {get: () => archive.key})
+  Object.defineProperty(staging, 'writable', {get: () => archive.writable})
 
   function onAppend () {
     staging.revert({skipIgnore: true})
