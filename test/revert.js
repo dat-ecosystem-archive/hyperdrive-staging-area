@@ -78,7 +78,7 @@ tape('revert', function (t) {
 })
 
 tape('replicate (archive)', function (t) {
-  clone.staging.readdir('/', function (err, files) {
+  clone.readdir('/', function (err, files) {
     t.error(err, 'no error')
     t.same(files.length, 0)
     t.end()
@@ -148,13 +148,13 @@ tape('commit', function (t) {
 })
 
 tape('replicate (archive)', function (t) {
-  clone.staging.readdir('/', function (err, files) {
+  clone.readdir('/', function (err, files) {
     t.error(err, 'no error')
     t.deepEqual(files.sort(), ['dir', 'hello.txt'])
-    clone.staging.readFile('/hello.txt', 'utf8', function (err, v) {
+    clone.readFile('/hello.txt', 'utf8', function (err, v) {
       t.error(err, 'no error')
       t.same(v, 'world')
-      clone.staging.readFile('/dir/hello.txt', 'utf8', function (err, v) {
+      clone.readFile('/dir/hello.txt', 'utf8', function (err, v) {
         t.error(err, 'no error')
         t.same(v, 'universe')
         t.end()
@@ -295,13 +295,13 @@ tape('revert', function (t) {
 })
 
 tape('replicate (archive)', function (t) {
-  clone.staging.readdir('/', function (err, files) {
+  clone.readdir('/', function (err, files) {
     t.error(err, 'no error')
     t.deepEqual(files.sort(), ['dir', 'hello.txt'])
-    clone.staging.readFile('/hello.txt', 'utf8', function (err, v) {
+    clone.readFile('/hello.txt', 'utf8', function (err, v) {
       t.error(err, 'no error')
       t.same(v, 'world')
-      clone.staging.readFile('/dir/hello.txt', 'utf8', function (err, v) {
+      clone.readFile('/dir/hello.txt', 'utf8', function (err, v) {
         t.error(err, 'no error')
         t.same(v, 'universe')
         t.end()
