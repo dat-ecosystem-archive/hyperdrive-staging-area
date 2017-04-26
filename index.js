@@ -15,7 +15,7 @@ function setup (archive, stagingPath) {
   staging.commit = (opts, cb) => commit(archive, stagingPath, opts, cb)
   staging.revert = (opts, cb) => revert(archive, stagingPath, opts, cb)
   staging.startAutoSync = () => archive.metadata.on('append', onAppend)
-  staging.stopAutoSync = () => archive.metadata.removeEventListener('append', onAppend)
+  staging.stopAutoSync = () => archive.metadata.removeListener('append', onAppend)
   Object.defineProperty(staging, 'key', {get: () => archive.key})
   Object.defineProperty(staging, 'writable', {get: () => archive.writable})
 
