@@ -1,6 +1,6 @@
 {
   "name": "hyperdrive-staging-area",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Staging area for local, uncommited writes that can sync to a hyperdrive",
   "main": "index.js",
   "scripts": {
