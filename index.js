@@ -68,6 +68,9 @@ function revert (archive, stagingPath, opts, cb) {
 }
 
 function readIgnore (stagingPath, opts, cb) {
+  if (opts.filter) {
+    return cb(opts.filter)
+  }
   if (opts.skipIgnore) {
     return done([])
   }

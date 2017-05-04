@@ -126,6 +126,7 @@ Options include:
 ```
 {
   skipIgnore: false // dont use the .datignore rules
+  filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
 }
 ```
 
@@ -138,6 +139,7 @@ Options include:
 ```
 {
   skipIgnore: false // dont use the .datignore rules
+  filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
 }
 ```
 
@@ -150,6 +152,7 @@ Options include:
 ```
 {
   skipIgnore: false // dont use the .datignore rules
+  filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
 }
 ```
 
