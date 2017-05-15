@@ -95,6 +95,6 @@ function readIgnore (stagingPath, opts, cb) {
   })
 
   function done (rules) {
-    cb((path) => anymatch(['/.dat'].concat(rules), path))
+    cb((path) => anymatch(['/.dat', '/.git'].concat(rules), path))
   }
 }
