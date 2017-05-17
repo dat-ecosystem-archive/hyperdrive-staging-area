@@ -6,32 +6,32 @@ var fs = require('fs')
 
 module.exports = setup
 
-function setup (archive, stagingPath) {
+function setup (archive, stagingPath, baseOpts = {}) {
   // setup staging object
   var staging = new ScopedFS(stagingPath)
   staging.isStaging = true
   staging.path = stagingPath
-  staging.diff = (opts, cb) => diffStaging(archive, stagingPath, opts, cb)
-  staging.commit = (opts, cb) => commit(archive, stagingPath, opts, cb)
-  staging.revert = (opts, cb) => revert(archive, stagingPath, opts, cb)
+  staging.diff = (opts, cb) => diffStaging(archive, stagingPath, opts, cb, baseOpts)
+  staging.commit = (opts, cb) => commit(archive, stagingPath, opts, cb, baseOpts)
+  staging.revert = (opts, cb) => revert(archive, stagingPath, opts, cb, baseOpts)
   staging.startAutoSync = () => archive.metadata.on('append', onAppend)
   staging.stopAutoSync = () => archive.metadata.removeListener('append', onAppend)
   Object.defineProperty(staging, 'key', {get: () => archive.key})
   Object.defineProperty(staging, 'writable', {get: () => archive.writable})
 
   function onAppend () {
-    staging.revert({skipIgnore: true})
+    staging.revert({skipDatIgnore: true})
   }
 
   return staging
 }
 
-function diffStaging (archive, stagingPath, opts, cb) {
+function diffStaging (archive, stagingPath, opts, cb, baseOpts = {}) {
   if (typeof opts === 'function') {
     cb = opts
     opts = null
   }
-  opts = opts || {}
+  opts = Object.assign(baseOpts, opts || {})
   cb = cb || (() => {})
 
   readIgnore(stagingPath, opts, function (filter) {
@@ -39,12 +39,12 @@ function diffStaging (archive, stagingPath, opts, cb) {
   })
 }
 
-function commit (archive, stagingPath, opts, cb) {
+function commit (archive, stagingPath, opts, cb, baseOpts = {}) {
   if (typeof opts === 'function') {
     cb = opts
     opts = null
   }
-  opts = opts || {}
+  opts = Object.assign(baseOpts, opts || {})
   cb = cb || (() => {})
 
   diffStaging(archive, stagingPath, opts, (err, c) => {
@@ -53,12 +53,12 @@ function commit (archive, stagingPath, opts, cb) {
   })
 }
 
-function revert (archive, stagingPath, opts, cb) {
+function revert (archive, stagingPath, opts, cb, baseOpts = {}) {
   if (typeof opts === 'function') {
     cb = opts
     opts = null
   }
-  opts = opts || {}
+  opts = Object.assign(baseOpts, opts || {})
   cb = cb || (() => {})
 
   diffStaging(archive, stagingPath, opts, (err, c) => {
@@ -71,8 +71,9 @@ function readIgnore (stagingPath, opts, cb) {
   if (opts.filter) {
     return cb(opts.filter)
   }
-  if (opts.skipIgnore) {
-    return done([])
+  opts.ignore = opts.ignore || ['/.dat', '/.git']
+  if (opts.skipDatIgnore) {
+    return done(opts.ignore)
   }
 
   // read .datignore
@@ -95,6 +96,6 @@ function readIgnore (stagingPath, opts, cb) {
   })
 
   function done (rules) {
-    cb((path) => anymatch(['/.dat', '/.git'].concat(rules), path))
+    cb((path) => anymatch(opts.ignore.concat(rules), path))
   }
 }

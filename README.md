@@ -86,9 +86,19 @@ staging.writeFile('/hello.txt', 'universe!', function (err) {
 
 ## API
 
-#### `var staging = HyperdriveStagingArea(archive, stagingPath)`
+#### `var staging = HyperdriveStagingArea(archive, stagingPath[, baseOpts])`
 
 Create a staging area for `archive` at the given `stagingPath`.
+
+You can specify `baseOpts` to be passed as the defaults to diff, commit, and revert. Options include:
+
+```
+{
+  skipDatIgnore: false // dont use the .datignore rules
+  ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
+  filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
+}
+```
 
 #### `staging.path`
 
@@ -125,7 +135,8 @@ Options include:
 
 ```
 {
-  skipIgnore: false // dont use the .datignore rules
+  skipDatIgnore: false // dont use the .datignore rules
+  ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
   filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
 }
 ```
@@ -138,7 +149,8 @@ Options include:
 
 ```
 {
-  skipIgnore: false // dont use the .datignore rules
+  skipDatIgnore: false // dont use the .datignore rules
+  ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
   filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
 }
 ```
@@ -151,7 +163,8 @@ Options include:
 
 ```
 {
-  skipIgnore: false // dont use the .datignore rules
+  skipDatIgnore: false // dont use the .datignore rules
+  ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
   filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
 }
 ```
