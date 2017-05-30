@@ -169,6 +169,19 @@ Options include:
 }
 ```
 
+#### `staging.readIgnore(opts, cb)`
+
+Read the .datignore and provide a `filter(path)=>bool` function. The callback does not provide an error, so its signature is `cb(filterFn)`.
+
+Options include:
+
+```
+{
+  skipDatIgnore: false // dont use the .datignore rules
+  ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
+}
+```
+
 #### `staging.startAutoSync()`
 
 Listens for updates to the archive and automatically reverts the staging area when a new entry is appended. Useful for syncing the staging for downloaded archives.

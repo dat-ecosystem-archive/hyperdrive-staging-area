@@ -14,6 +14,7 @@ function setup (archive, stagingPath, baseOpts = {}) {
   staging.diff = (opts, cb) => diffStaging(archive, stagingPath, opts, cb, baseOpts)
   staging.commit = (opts, cb) => commit(archive, stagingPath, opts, cb, baseOpts)
   staging.revert = (opts, cb) => revert(archive, stagingPath, opts, cb, baseOpts)
+  staging.readIgnore = (opts, cb) => readIgnore(stagingPath, opts, cb)
   staging.startAutoSync = () => archive.metadata.on('append', onAppend)
   staging.stopAutoSync = () => archive.metadata.removeListener('append', onAppend)
   Object.defineProperty(staging, 'key', {get: () => archive.key})
@@ -96,6 +97,7 @@ function readIgnore (stagingPath, opts, cb) {
   })
 
   function done (rules) {
-    cb((path) => anymatch(opts.ignore.concat(rules), path))
+    rules = opts.ignore.concat(rules)
+    cb((path) => anymatch(rules, path))
   }
 }
