@@ -189,3 +189,7 @@ Listens for updates to the archive and automatically reverts the staging area wh
 #### `staging.stopAutoSync()`
 
 Stop syncing the staging area.
+
+#### `HyperdriveStagingArea.parseIgnoreRules(str)`
+
+Parses the list of rules in a `.datignore` and outputs an array that can be used by anymatch.

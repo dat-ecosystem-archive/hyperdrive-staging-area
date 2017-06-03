@@ -5,6 +5,7 @@ var {join} = require('path')
 var fs = require('fs')
 
 module.exports = setup
+module.exports.parseIgnoreRules = parseIgnoreRules
 
 function setup (archive, stagingPath, baseOpts = {}) {
   // setup staging object
@@ -82,22 +83,22 @@ function readIgnore (stagingPath, opts, cb) {
     if (err || typeof rulesRaw !== 'string') {
       return done([])
     }
-
-    // massage rules
-    done(
-      rulesRaw.split('\n')
-       .filter(Boolean)
-        .map(rule => {
-          if (!rule.startsWith('/')) {
-            rule = '**/' + rule
-          }
-          return rule
-        })
-    )
+    done(parseIgnoreRules(rulesRaw))
   })
 
   function done (rules) {
     rules = opts.ignore.concat(rules)
     cb((path) => anymatch(rules, path))
   }
+}
+
+function parseIgnoreRules (rulesRaw) {
+  return rulesRaw.split('\n')
+    .filter(Boolean)
+    .map(rule => {
+      if (!rule.startsWith('/')) {
+        rule = '**/' + rule
+      }
+      return rule
+    })
 }
