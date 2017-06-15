@@ -97,6 +97,7 @@ You can specify `baseOpts` to be passed as the defaults to diff, commit, and rev
   skipDatIgnore: false // dont use the .datignore rules
   ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
   filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
+  shallow: false // dont recurse into folders that need to be added or removed
 }
 ```
 
@@ -138,6 +139,7 @@ Options include:
   skipDatIgnore: false // dont use the .datignore rules
   ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
   filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
+  shallow: false // dont recurse into folders that need to be added or removed
 }
 ```
 
@@ -152,6 +154,7 @@ Options include:
   skipDatIgnore: false // dont use the .datignore rules
   ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
   filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
+  shallow: false // dont recurse into folders that need to be added or removed
 }
 ```
 
@@ -166,6 +169,7 @@ Options include:
   skipDatIgnore: false // dont use the .datignore rules
   ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
   filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
+  shallow: false // dont recurse into folders that need to be added or removed
 }
 ```
 

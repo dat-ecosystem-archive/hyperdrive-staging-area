@@ -37,7 +37,11 @@ function diffStaging (archive, stagingPath, opts, cb, baseOpts = {}) {
   cb = cb || (() => {})
 
   readIgnore(stagingPath, opts, function (filter) {
-    dft.diff(stagingPath, {fs: archive}, {filter}).then(c => cb(null, c), cb)
+    dft.diff(stagingPath, {fs: archive}, {filter, shallow: opts.shallow})
+      .then(
+        c => cb(null, c),
+        cb
+      )
   })
 }
 
