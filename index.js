@@ -33,7 +33,7 @@ function diffStaging (archive, stagingPath, opts, cb, baseOpts = {}) {
     cb = opts
     opts = null
   }
-  opts = Object.assign(baseOpts, opts || {})
+  opts = Object.assign({}, baseOpts, opts || {})
   cb = cb || (() => {})
 
   readIgnore(stagingPath, opts, function (filter) {
@@ -46,7 +46,7 @@ function commit (archive, stagingPath, opts, cb, baseOpts = {}) {
     cb = opts
     opts = null
   }
-  opts = Object.assign(baseOpts, opts || {})
+  opts = Object.assign({}, baseOpts, opts || {})
   cb = cb || (() => {})
 
   diffStaging(archive, stagingPath, opts, (err, c) => {
@@ -60,7 +60,7 @@ function revert (archive, stagingPath, opts, cb, baseOpts = {}) {
     cb = opts
     opts = null
   }
-  opts = Object.assign(baseOpts, opts || {})
+  opts = Object.assign({}, baseOpts, opts || {})
   cb = cb || (() => {})
 
   diffStaging(archive, stagingPath, opts, (err, c) => {
