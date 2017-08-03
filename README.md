@@ -140,6 +140,7 @@ Options include:
   ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
   filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
   shallow: false // dont recurse into folders that need to be added or removed
+  compareContent: false // diff by content? (this removes false positives)
 }
 ```
 
@@ -155,6 +156,7 @@ Options include:
   ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
   filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
   shallow: false // dont recurse into folders that need to be added or removed
+  compareContent: false // diff by content? (this removes false positives)
 }
 ```
 
@@ -170,6 +172,7 @@ Options include:
   ignore: ['.dat', '.git'] // base ignore rules (used in addition to .datignore)
   filter: false // a predicate of (path) => bool, where writes are skipped if == true. Takes precedence over .datignore
   shallow: false // dont recurse into folders that need to be added or removed
+  compareContent: false // diff by content? (this removes false positives)
 }
 ```
 

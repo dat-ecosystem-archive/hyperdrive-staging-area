@@ -23,7 +23,7 @@
   "homepage": "https://github.com/pfrazee/hyperdrive-staging-area#readme",
   "dependencies": {
     "anymatch": "^1.3.0",
-    "diff-file-tree": "^2.0.0",
+    "diff-file-tree": "^2.1.1",
     "scoped-fs": "^1.0.0"
   },
   "devDependencies": {
